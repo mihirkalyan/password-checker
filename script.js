@@ -1,49 +1,97 @@
-
 document.addEventListener('DOMContentLoaded', () => {
     const passwordInput = document.getElementById('password-input');
-    const fortressContainer = document.getElementById('fortress-container');
+    const mountainDisplay = document.getElementById('mountain-display');
     const feedbackContainer = document.getElementById('feedback-container');
 
     const API_URL = 'http://127.0.0.1:5000/analyze';
 
-    const castleParts = {
-        land: `
-<pre>
-................................................................
-................................................................
-................................................................
-................................................................
-................................................................
-</pre>
-`,
-        walls: `
-<pre>
-|..____..|..____..|..____..|..____..|..____..|..____..|..____..|
-|........|........|........|........|........|........|........|
-</pre>
-`,
-        moat: `
-<pre>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-</pre>
-`,
-        towers: `
-<pre>
-  /\                                                        /\
- /  \                                                      /  \
-|    |                                                    |    |
-|....|                                                    |....|
-</pre>
-`,
-        dragon: `
-<pre>
-                      /\_/\
-                     / o o \
-                    (  _  )
-                     \` ' /
-                      \|/
-</pre>
-`
+    const mountainLevels = [
+        // Score 0: No password, no mountain
+        ``,
+        // Score 1: A small hill
+        `
+
+
+
+
+
+
+
+
+
+                       /\ 
+                      /  \ 
+                     /    \ 
+    ________________/      \________________`,
+        // Score 2: A taller mountain
+        `
+
+
+
+
+
+
+                        /\ 
+                       /  \ 
+                      /    \ 
+                     /      \ 
+                    /        \ 
+    _______________/          \_______________`,
+        // Score 3: Mountain with a snow cap
+        `
+
+
+
+
+                        /\ 
+                       /..\ 
+                      /....\ 
+                     /......\ 
+                    /        \ 
+                   /          \ 
+                  /            \ 
+    _____________/              \_____________`,
+        // Score 4: Tallest mountain with clouds
+        `
+      _    _        _    _
+    _(   )(   )_    _(   )(   )_
+  _(           )_(_           )_
+ (_______________) _______________)
+
+                        /\ 
+                       /..\ 
+                      /....\ 
+                     /......\ 
+                    /        \ 
+                   /          \ 
+                  /            \ 
+    _____________/              \_____________`
+    ];
+
+    const updateUI = (data) => {
+        // Set the mountain art from the array based on score
+        mountainDisplay.innerHTML = mountainLevels[data.score];
+
+        // Build the feedback HTML
+        let feedbackHTML = '';
+        if (data.warning) {
+            feedbackHTML += `<p class="warning">> ${data.warning}</p>`;
+        }
+        if (data.suggestions && data.suggestions.length > 0) {
+            feedbackHTML += '<ul>';
+            data.suggestions.forEach(suggestion => {
+                feedbackHTML += `<li>> ${suggestion}</li>`;
+            });
+            feedbackHTML += '</ul>';
+        }
+        feedbackContainer.innerHTML = feedbackHTML;
+
+        // Add or remove the class to show/hide the feedback box
+        if (feedbackHTML.trim() !== '') {
+            feedbackContainer.classList.add('has-feedback');
+        } else {
+            feedbackContainer.classList.remove('has-feedback');
+        }
     };
 
     const analyzePassword = async () => {
@@ -68,56 +116,11 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error("Error fetching password analysis:", error);
             feedbackContainer.innerHTML = `<p class="warning"> Could not connect to analysis server. Please try again later.</p>`;
+            feedbackContainer.classList.add('has-feedback');
         }
     };
 
-    const updateUI = (data) => {
-        // 1. Update Fortress Visual
-        fortressContainer.querySelector('.land').innerHTML = castleParts.land;
-
-        if (data.score >= 1) {
-            fortressContainer.querySelector('.walls').innerHTML = castleParts.walls;
-        } else {
-            fortressContainer.querySelector('.walls').innerHTML = '';
-        }
-
-        if (data.score >= 2) {
-            fortressContainer.querySelector('.moat').innerHTML = castleParts.moat;
-        } else {
-            fortressContainer.querySelector('.moat').innerHTML = '';
-        }
-
-        if (data.score >= 3) {
-            fortressContainer.querySelector('.towers').innerHTML = castleParts.towers;
-        } else {
-            fortressContainer.querySelector('.towers').innerHTML = '';
-        }
-
-        if (data.score >= 4) {
-            fortressContainer.querySelector('.dragon').innerHTML = castleParts.dragon;
-        } else {
-            fortressContainer.querySelector('.dragon').innerHTML = '';
-        }
-
-
-        // 2. Update Text Feedback
-        let feedbackHTML = '';
-        if (data.warning) {
-            feedbackHTML += `<p class="warning">> ${data.warning}</p>`;
-        }
-        if (data.suggestions && data.suggestions.length > 0) {
-            feedbackHTML += '<ul>';
-            data.suggestions.forEach(suggestion => {
-                feedbackHTML += `<li>> ${suggestion}</li>`;
-            });
-            feedbackHTML += '</ul>';
-        }
-        feedbackContainer.innerHTML = feedbackHTML;
-    };
-
-    // Event Listeners
     passwordInput.addEventListener('input', analyzePassword);
 
-    // Initial analysis on page load
     analyzePassword();
 });

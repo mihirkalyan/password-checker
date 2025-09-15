@@ -13,10 +13,11 @@ body {
 
 .container {
     background: #000;
-    padding: 2rem 3rem;
+    padding: 1rem 3rem; /* Reduced vertical padding */
     border-radius: 0;
     box-shadow: none;
     max-width: 800px;
+    width: 100%;
     border: 2px solid #0F0;
 }
 
@@ -31,7 +32,7 @@ h1 {
     display: flex;
     gap: 1.5rem;
     justify-content: flex-start;
-    margin: 1.5rem 0;
+    margin: 1rem 0; /* Reduced vertical margin */
     align-items: center;
 }
 
@@ -62,41 +63,32 @@ input:focus, select:focus {
     border-color: #0F0;
 }
 
-#fortress-container {
+#mountain-container {
     position: relative;
     width: 100%;
-    height: auto;
-    margin: 2rem auto;
+    height: 300px;
+    margin: 1rem auto;
     background-color: #000;
     border-radius: 0;
     overflow: hidden;
     white-space: pre;
     font-family: 'VT323', monospace;
     text-align: left;
-    font-size: 1.2rem;
+    font-size: clamp(6px, 1.2vw, 12px);
     color: #0F0;
 }
-
-.fortress-element {
-    opacity: 0;
-    transition: opacity 0.6s ease-in-out;
-}
-
-.score-0 .land { opacity: 1; }
-.score-1 .walls { opacity: 1; }
-.score-2 .walls, .score-2 .moat { opacity: 1; }
-.score-3 .walls, .score-3 .moat, .score-3 .towers { opacity: 1; }
-.score-4 .walls, .score-4 .moat, .score-4 .towers, .score-4 .dragon { opacity: 1; }
 
 
 #feedback-container {
     margin-top: 1.5rem;
-    padding: 1rem;
-    background-color: #000;
-    border: 1px solid #0F0;
-    border-radius: 0;
-    min-height: 80px;
     text-align: left;
+}
+
+/* This class is added by JS when there is feedback to show */
+#feedback-container.has-feedback {
+    padding: 1rem;
+    border: 1px solid #0F0;
+    min-height: 80px;
 }
 
 #feedback-container .warning {

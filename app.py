@@ -1,3 +1,4 @@
+import re
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from zxcvbn import zxcvbn
@@ -7,33 +8,47 @@ app = Flask(__name__)
 # Enable Cross-Origin Resource Sharing to allow frontend communication
 CORS(app)
 
-# Define high-risk account types for stricter password rules
-HIGH_RISK_ACCOUNTS = {'Banking', 'Email'}
+def calculate_mountain_score(password):
+    """Calculates a score from 0-4 based on password complexity."""
+    length = len(password)
+    if length == 0:
+        return 0
+
+    has_numbers = re.search(r"\d", password) is not None
+    has_symbols = re.search(r"[!@#$%^&*(),.?\":{}|<>]", password) is not None
+
+    # Score 4: Long, with numbers and symbols
+    if length >= 12 and has_numbers and has_symbols:
+        return 4
+    # Score 3: Medium length with numbers or symbols
+    elif length > 7 and (has_numbers or has_symbols):
+        return 3
+    # Score 2: Medium length, no numbers/symbols
+    elif length > 7:
+        return 2
+    # Score 1: Short password
+    else: # length > 0
+        return 1
 
 @app.route('/analyze', methods=['POST'])
 def analyze_password():
     data = request.get_json()
     password = data.get('password', '')
-    account_type = data.get('account_type', 'Social Media')
 
     # If the password is empty, return a default weak score.
     if not password:
         return jsonify({
             'score': 0,
             'warning': '',
-            'suggestions': ['Start typing to see your fortress grow!']
+            'suggestions': ['Start typing to see your mountain grow!']
         })
 
-    # Perform the core analysis with zxcvbn
-    results = zxcvbn(password)
-    score = results.get('score', 0)
-    feedback = results.get('feedback', {})
+    # Use our custom logic for the score
+    score = calculate_mountain_score(password)
 
-    # --- Context-Aware Recommendations ---
-    # For high-risk accounts, we require a stronger password.
-    # If the score isn't "Excellent" (4), we demote it by one level.
-    if account_type in HIGH_RISK_ACCOUNTS and score < 4:
-        score = max(0, score - 1) # Ensure score doesn't go below 0
+    # Still use zxcvbn for its detailed feedback
+    results = zxcvbn(password)
+    feedback = results.get('feedback', {})
 
     response_data = {
         'score': score,
