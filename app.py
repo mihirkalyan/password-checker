@@ -3,13 +3,11 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from zxcvbn import zxcvbn
 
-# Initialize Flask App
+
 app = Flask(__name__)
-# Enable Cross-Origin Resource Sharing to allow frontend communication
 CORS(app)
 
 def calculate_mountain_score(password):
-    """Calculates a score from 0-4 based on password complexity."""
     length = len(password)
     if length == 0:
         return 0
@@ -17,17 +15,15 @@ def calculate_mountain_score(password):
     has_numbers = re.search(r"\d", password) is not None
     has_symbols = re.search(r"[!@#$%^&*(),.?\":{}|<>]", password) is not None
 
-    # Score 4: Long, with numbers and symbols
     if length >= 12 and has_numbers and has_symbols:
+        return 5
+    elif length > 7 and has_numbers and has_symbols:
         return 4
-    # Score 3: Medium length with numbers or symbols
     elif length > 7 and (has_numbers or has_symbols):
         return 3
-    # Score 2: Medium length, no numbers/symbols
-    elif length > 7:
+    elif length > 5:
         return 2
-    # Score 1: Short password
-    else: # length > 0
+    else:
         return 1
 
 @app.route('/analyze', methods=['POST'])
